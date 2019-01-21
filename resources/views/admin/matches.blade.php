@@ -177,7 +177,8 @@
                                                 </select>
                                                 <br><br>
                                                 <label for="">Select Wicket Keeper of Team 1</label>
-                                                <select class="form-control" name="select_wk_1" id="select_wk_1" required>
+                                                <select class="form-control" name="select_wk_1" id="select_wk_1"
+                                                        required>
 
                                                 </select>
                                             </div>
@@ -204,7 +205,8 @@
                                                 </select>
                                                 <br><br>
                                                 <label for="">Select Wicket Keeper of Team 2</label>
-                                                <select class="form-control" name="select_wk_2" id="select_wk_2" required>
+                                                <select class="form-control" name="select_wk_2" id="select_wk_2"
+                                                        required>
 
                                                 </select>
                                             </div>
@@ -235,7 +237,8 @@
                                                         id="team_runs_disp">12</span>/<span
                                                         id="wickets">1</span></b> (<span id="overs_bowled"></span>)
                                             <br>
-                                            <span style="float: right"><button class="btn btn-gradient-ibiza" id="end_match">End Match</button></span>
+                                            <span style="float: right"><button class="btn btn-gradient-ibiza"
+                                                                               id="end_match">End Match</button></span>
                                             <br>
                                         </div>
                                         <div class="table-responsive" id="table-score">
@@ -333,6 +336,11 @@
                                                 </button>
                                             </div>
                                         </div>
+                                        <div class="hidden" id="scorecard">
+                                            <div class="table-responsive" id="batting-first">
+
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -408,7 +416,8 @@
                                                 <div class="row" id="batsmen">
                                                     <div class="col-lg-6">
                                                         <label for="">Reason for ending match</label>
-                                                        <input type="text" class="form-control" id="reason_end_match" name="" required>
+                                                        <input type="text" class="form-control" id="reason_end_match"
+                                                               name="" required>
                                                     </div>
                                                     <div class="col-lg-6"></div>
                                                 </div>

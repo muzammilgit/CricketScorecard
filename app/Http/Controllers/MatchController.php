@@ -281,7 +281,9 @@ class MatchController extends Controller
         $batsmen1 = array();
         if (count($data["first_innings_batsmen"]) > 0) {
             foreach ($data["first_innings_batsmen"] as $batsman) {
+                $bowler = DB::select('SELECT `player_name` FROM `players` WHERE `id` = ( SELECT `bowler_id` FROM `overs` WHERE `id` = ' . $batsman->over_id . ')')[0]->player_name;
                 $batsman = $this->filterPlayerScorecard($data["first_innings_all_batsmen"], $batsman->scored_by, true, $batsman, $match_id, $data["innings"], $batsman->out_param);
+                $batsman->bowler = ' b ' . $bowler;
                 $batsmen1[] = $batsman;
             }
         }
@@ -289,9 +291,11 @@ class MatchController extends Controller
         $b2_id = $batsman->b2_id;
         $batsman->out_param = 0;
         $batsman = $this->filterPlayerScorecard($data["first_innings_all_batsmen"], $batsman->b1_id, true, $batsman, $match_id, $data["innings"], 0);
+        $batsman->bowler = '';
         $batsmen1[] = $batsman;
         $batsman->out_param = 0;
         $batsman = $this->filterPlayerScorecard($data["first_innings_all_batsmen"], $b2_id, true, $batsman, $match_id, $data["innings"], 0);
+        $batsman->bowler = '';
         $batsmen1[] = $batsman;
         $data["first_innings_batsmen"] = $batsmen1;
         $data["first_innings_all_bowlers"] = $db::select('SELECT a.id as pid, player_name FROM `players` a WHERE a.team_id AND `team_id` = ' . $bowl);
@@ -321,14 +325,18 @@ class MatchController extends Controller
         $data["second_innings_bowling_team"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $bowl)[0]->team_name;
         $batsmen1 = array();
         foreach ($data["second_innings_batsmen"] as $batsman) {
+            $bowler = DB::select('SELECT `player_name` FROM `players` WHERE `id` = ( SELECT `bowler_id` FROM `overs` WHERE `id` = ' . $batsman->over_id . ')')[0]->player_name;
             $batsman = $this->filterPlayerScorecard($data["second_innings_all_batsmen"], $batsman->scored_by, true, $batsman, $match_id, $data["innings"], $batsman->out_param);
+            $batsman->bowler = ' b ' . $bowler;
             $batsmen1[] = $batsman;
         }
         $batsman = $db::select('SELECT * FROM `current_batsman_and_bowler` WHERE `m_id` = ' . $match_id . ' AND `is_delete` IS NULL AND  `innings` = 2 ORDER BY `id` DESC LIMIT 1')[0];
         $b2_id = $batsman->b2_id;
         $batsman = $this->filterPlayerScorecard($data["second_innings_all_batsmen"], $batsman->b1_id, true, $batsman, $match_id, $data["innings"], 0);
+        $batsman->bowler = '';
         $batsmen1[] = $batsman;
         $batsman = $this->filterPlayerScorecard($data["second_innings_all_batsmen"], $b2_id, true, $batsman, $match_id, $data["innings"], 0);
+        $batsman->bowler = '';
         $batsmen1[] = $batsman;
         $data["second_innings_batsmen"] = $batsmen1;
         $data["second_innings_all_bowlers"] = $db::select('SELECT a.id as pid, player_name FROM `players` a WHERE a.team_id AND `team_id` = ' . $bowl);
@@ -419,14 +427,11 @@ class MatchController extends Controller
                 $ev->fielder_1 = '';
                 $ev->fielder_2 = '';
                 switch ($out_params) {
-                    case 0:
-                        $ev->out_param = 'batting';
-                        break;
                     case 1:
-                        $ev->out_param = 'Bowled';
+                        $ev->out_param = '';
                         break;
                     case 2:
-                        $ev->out_param = 'Catch Out';
+                        $ev->out_param = 'c';
                         $ev->fielder_1 = DB::select('SELECT `player_name` FROM `players` WHERE `id` =' . $batsman->fielder_1)[0]->player_name;
                         break;
                     case 3:
@@ -438,12 +443,14 @@ class MatchController extends Controller
                         $ev->fielder_2 = DB::select('SELECT `player_name` FROM `players` WHERE `id` =' . $batsman->fielder_2)[0]->player_name;
                         break;
                     case 5:
-                        $ev->out_param = 'Stumped';
+                        $ev->out_param = 'st';
                         $ev->fielder_1 = DB::select('SELECT `player_name` FROM `` WHERE `id` =' . $batsman->fielder_1)[0]->player_name;
                         break;
                     case 6:
-                        $ev->out_param = 'Hit Wicket';
+                        $ev->out_param = 'Hit W';
                         break;
+                    default:
+                        $ev->out_param = 'batting';
                 }
                 return $ev;
             }

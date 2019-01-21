@@ -47991,6 +47991,7 @@ var json_v = {
   second_team_id: 0,
   second_team_name: ''
 };
+var scorecard = {};
 var totalballs = 6;
 var out_params = [{
   id: 1,
@@ -48297,6 +48298,7 @@ function matchOver() {
 }
 
 function submitWinnerToServer(overs_bowled, total_overs, wickets, first_team_runs, second_team_runs) {
+  getScorecard();
   var winning_team = '';
   var winning_team_id = '';
 
@@ -49192,6 +49194,132 @@ function getBowlerAndBatsmen(id) {
   });
 }
 
+function getScorecard() {
+  $.post('/match/' + json_v.match_id + '/getScorecard', {
+    _token: csrf_token
+  }).then(function (data) {
+    data = JSON.parse(data);
+    scorecard = data;
+    console.log(data);
+    getScorecardHtml();
+  });
+}
+
+function getScorecardHtml() {
+  $('#scorecard').removeClass('hidden');
+  var innerhtml = '<br><br><b>1st Innings - ' + scorecard["first_innings_batting_team"] + '</b> <br><table id="first-innings" class="table table-bordered">' + '<thead>' + '<tr>' + '<th>Batsman Name</th>' + '<th>Runs Scored</th>' + '<th>Balls Faced</th>' + '<th>Fours</th>' + '<th>Sixes</th>' + '<th>SR</th>' + '</tr>' + '</thead><tbody>';
+  var _iteratorNormalCompletion17 = true;
+  var _didIteratorError17 = false;
+  var _iteratorError17 = undefined;
+
+  try {
+    for (var _iterator17 = scorecard.first_innings_batsmen[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+      var ev = _step17.value;
+      innerhtml += '<tr>';
+      innerhtml += '<td><span style="font-weight: bold">' + ev["player_name"] + '</span>&nbsp;&nbsp; <span>' + ev["out_param"] + ' ' + ev["fielder_1"] + '' + ev["bowler"] + '</span></td>';
+      innerhtml += '<td>' + ev["runs"] + '</td>' + '<td>' + ev["balls_faced"] + '</td>' + '<td>' + ev["fours"] + '</td>' + '<td>' + ev["sixes"] + '</td>' + '<td>' + ev["strike_rate"] + '</td>' + '</tr>';
+    }
+  } catch (err) {
+    _didIteratorError17 = true;
+    _iteratorError17 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion17 && _iterator17.return != null) {
+        _iterator17.return();
+      }
+    } finally {
+      if (_didIteratorError17) {
+        throw _iteratorError17;
+      }
+    }
+  }
+
+  innerhtml += '</tbody></table><br><br> <b>' + scorecard["first_innings_bowling_team"] + '</b><table class="table table-bordered"><thead><tr>' + '<th>Bowler Name</th>' + '<th>O</th>' + '<th>R</th>' + '<th>W</th>' + '<th>NB</th>' + '<th>WD</th>' + '<th>ECO</th>' + '</thead></tr><tbody>';
+  var _iteratorNormalCompletion18 = true;
+  var _didIteratorError18 = false;
+  var _iteratorError18 = undefined;
+
+  try {
+    for (var _iterator18 = scorecard.first_innings_bowlers[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+      var _ev6 = _step18.value;
+      innerhtml += '<tr>';
+      innerhtml += '<td><span style="font-weight: bold">' + _ev6["player_name"] + '</span></td>';
+      innerhtml += '<td>' + _ev6["current_ball"] + '</td>' + '<td>' + _ev6["runs"] + '</td>' + '<td>' + _ev6["wickets"] + '</td>' + '<td>' + _ev6["no_ball"] + '</td>' + '<td>' + _ev6["wide_ball"] + '</td>' + '<td>' + _ev6["economy_rate"] + '</td>' + '</tr>';
+    }
+  } catch (err) {
+    _didIteratorError18 = true;
+    _iteratorError18 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion18 && _iterator18.return != null) {
+        _iterator18.return();
+      }
+    } finally {
+      if (_didIteratorError18) {
+        throw _iteratorError18;
+      }
+    }
+  }
+
+  innerhtml += '</tbody>' + '</table>';
+  innerhtml += '<br><br><b>2nd Innings - ' + scorecard["second_innings_batting_team"] + '</b> <br><table id="first-innings" class="table table-bordered">' + '<thead>' + '<tr>' + '<th>Batsman Name</th>' + '<th>Runs Scored</th>' + '<th>Balls Faced</th>' + '<th>Fours</th>' + '<th>Sixes</th>' + '<th>SR</th>' + '</tr>' + '</thead><tbody>';
+  var _iteratorNormalCompletion19 = true;
+  var _didIteratorError19 = false;
+  var _iteratorError19 = undefined;
+
+  try {
+    for (var _iterator19 = scorecard.second_innings_batsmen[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+      var _ev7 = _step19.value;
+      innerhtml += '<tr>';
+      innerhtml += '<td><span style="font-weight: bold">' + _ev7["player_name"] + '</span>&nbsp;&nbsp; <span>' + _ev7["out_param"] + ' ' + _ev7["fielder_1"] + '' + _ev7["bowler"] + '</span></td>';
+      innerhtml += '<td>' + _ev7["runs"] + '</td>' + '<td>' + _ev7["balls_faced"] + '</td>' + '<td>' + _ev7["fours"] + '</td>' + '<td>' + _ev7["sixes"] + '</td>' + '<td>' + _ev7["strike_rate"] + '</td>' + '</tr>';
+    }
+  } catch (err) {
+    _didIteratorError19 = true;
+    _iteratorError19 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion19 && _iterator19.return != null) {
+        _iterator19.return();
+      }
+    } finally {
+      if (_didIteratorError19) {
+        throw _iteratorError19;
+      }
+    }
+  }
+
+  innerhtml += '</tbody></table><br><br> <b>' + scorecard["second_innings_bowling_team"] + '</b><table class="table table-bordered"><thead><tr>' + '<th>Bowler Name</th>' + '<th>O</th>' + '<th>R</th>' + '<th>W</th>' + '<th>NB</th>' + '<th>WD</th>' + '<th>ECO</th>' + '</thead></tr><tbody>';
+  var _iteratorNormalCompletion20 = true;
+  var _didIteratorError20 = false;
+  var _iteratorError20 = undefined;
+
+  try {
+    for (var _iterator20 = scorecard.second_innings_bowlers[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+      var _ev8 = _step20.value;
+      innerhtml += '<tr>';
+      innerhtml += '<td><span style="font-weight: bold">' + _ev8["player_name"] + '</span></td>';
+      innerhtml += '<td>' + _ev8["current_ball"] + '</td>' + '<td>' + _ev8["runs"] + '</td>' + '<td>' + _ev8["wickets"] + '</td>' + '<td>' + _ev8["no_ball"] + '</td>' + '<td>' + _ev8["wide_ball"] + '</td>' + '<td>' + _ev8["economy_rate"] + '</td>' + '</tr>';
+    }
+  } catch (err) {
+    _didIteratorError20 = true;
+    _iteratorError20 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion20 && _iterator20.return != null) {
+        _iterator20.return();
+      }
+    } finally {
+      if (_didIteratorError20) {
+        throw _iteratorError20;
+      }
+    }
+  }
+
+  innerhtml += '</tbody>' + '</table>';
+  $('#batting-first').html(innerhtml);
+}
+
 $(document).ready(function () {
   $('#nextBatsman').on('hidden.bs.modal', function () {
     var k = json_v.currentover.filter(function (v) {
@@ -49222,26 +49350,26 @@ $(document).ready(function () {
       return v['pid'] !== parseInt(_this.value);
     });
     var v = '<option selected disabled>Select Batsman</option>';
-    var _iteratorNormalCompletion17 = true;
-    var _didIteratorError17 = false;
-    var _iteratorError17 = undefined;
+    var _iteratorNormalCompletion21 = true;
+    var _didIteratorError21 = false;
+    var _iteratorError21 = undefined;
 
     try {
-      for (var _iterator17 = alb[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-        var ev = _step17.value;
+      for (var _iterator21 = alb[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+        var ev = _step21.value;
         v += '<option value="' + ev.pid + '">' + ev.player_name + '</option>';
       }
     } catch (err) {
-      _didIteratorError17 = true;
-      _iteratorError17 = err;
+      _didIteratorError21 = true;
+      _iteratorError21 = err;
     } finally {
       try {
-        if (!_iteratorNormalCompletion17 && _iterator17.return != null) {
-          _iterator17.return();
+        if (!_iteratorNormalCompletion21 && _iterator21.return != null) {
+          _iterator21.return();
         }
       } finally {
-        if (_didIteratorError17) {
-          throw _iteratorError17;
+        if (_didIteratorError21) {
+          throw _iteratorError21;
         }
       }
     }
@@ -49425,33 +49553,33 @@ $(document).ready(function () {
 function addcaptain(val, id, wk, arr) {
   var html = '';
   var k = '';
-  var _iteratorNormalCompletion18 = true;
-  var _didIteratorError18 = false;
-  var _iteratorError18 = undefined;
+  var _iteratorNormalCompletion22 = true;
+  var _didIteratorError22 = false;
+  var _iteratorError22 = undefined;
 
   try {
     var _loop3 = function _loop3() {
-      var ev = _step18.value;
+      var ev = _step22.value;
       k = arr.filter(function (v) {
         return parseInt(v["id"]) === parseInt(ev);
       })[0];
       html += '<option value="' + k["id"] + '">' + k["player_name"] + '</option>';
     };
 
-    for (var _iterator18 = val[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+    for (var _iterator22 = val[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
       _loop3();
     }
   } catch (err) {
-    _didIteratorError18 = true;
-    _iteratorError18 = err;
+    _didIteratorError22 = true;
+    _iteratorError22 = err;
   } finally {
     try {
-      if (!_iteratorNormalCompletion18 && _iterator18.return != null) {
-        _iterator18.return();
+      if (!_iteratorNormalCompletion22 && _iterator22.return != null) {
+        _iterator22.return();
       }
     } finally {
-      if (_didIteratorError18) {
-        throw _iteratorError18;
+      if (_didIteratorError22) {
+        throw _iteratorError22;
       }
     }
   }

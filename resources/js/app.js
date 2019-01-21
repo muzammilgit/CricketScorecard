@@ -56,6 +56,8 @@ let json_v = {
     second_team_name: ''
 };
 
+let scorecard = {};
+
 let totalballs = 6;
 let out_params = [
     {
@@ -289,6 +291,7 @@ function matchOver() {
 }
 
 function submitWinnerToServer(overs_bowled, total_overs, wickets, first_team_runs, second_team_runs) {
+    getScorecard();
     let winning_team = '';
     let winning_team_id = '';
     if (overs_bowled === total_overs) {
@@ -872,6 +875,108 @@ function getBowlerAndBatsmen(id) {
             $('#reason').html(data["reason"]);
         }
     });
+}
+
+function getScorecard() {
+    $.post('/match/' + json_v.match_id + '/getScorecard', {_token: csrf_token}).then((data) => {
+        data = JSON.parse(data);
+        scorecard = data;
+        console.log(data);
+        getScorecardHtml();
+    });
+}
+
+function getScorecardHtml() {
+    $('#scorecard').removeClass('hidden');
+    let innerhtml = '<br><br><b>1st Innings - ' + scorecard["first_innings_batting_team"] + '</b> <br><table id="first-innings" class="table table-bordered">' +
+        '<thead>' +
+        '<tr>' +
+        '<th>Batsman Name</th>' +
+        '<th>Runs Scored</th>' +
+        '<th>Balls Faced</th>' +
+        '<th>Fours</th>' +
+        '<th>Sixes</th>' +
+        '<th>SR</th>' +
+        '</tr>' +
+        '</thead><tbody>';
+    for (let ev of scorecard.first_innings_batsmen) {
+        innerhtml += '<tr>';
+        innerhtml += '<td><span style="font-weight: bold">' + ev["player_name"] + '</span>&nbsp;&nbsp; <span>' + ev["out_param"] + ' ' + ev["fielder_1"] + '' + ev["bowler"] + '</span></td>';
+        innerhtml += '<td>' + ev["runs"] + '</td>' +
+            '<td>' + ev["balls_faced"] + '</td>' +
+            '<td>' + ev["fours"] + '</td>' +
+            '<td>' + ev["sixes"] + '</td>' +
+            '<td>' + ev["strike_rate"] + '</td>' +
+            '</tr>';
+    }
+    innerhtml += '</tbody></table><br><br> <b>' + scorecard["first_innings_bowling_team"] + '</b><table class="table table-bordered"><thead><tr>' +
+        '<th>Bowler Name</th>' +
+        '<th>O</th>' +
+        '<th>R</th>' +
+        '<th>W</th>' +
+        '<th>NB</th>' +
+        '<th>WD</th>' +
+        '<th>ECO</th>' +
+        '</thead></tr><tbody>';
+    for (let ev of scorecard.first_innings_bowlers) {
+        innerhtml += '<tr>';
+        innerhtml += '<td><span style="font-weight: bold">' + ev["player_name"] + '</span></td>';
+        innerhtml += '<td>' + ev["current_ball"] + '</td>' +
+            '<td>' + ev["runs"] + '</td>' +
+            '<td>' + ev["wickets"] + '</td>' +
+            '<td>' + ev["no_ball"] + '</td>' +
+            '<td>' + ev["wide_ball"] + '</td>' +
+            '<td>' + ev["economy_rate"] + '</td>' +
+            '</tr>';
+    }
+
+    innerhtml += '</tbody>' +
+        '</table>';
+    innerhtml += '<br><br><b>2nd Innings - ' + scorecard["second_innings_batting_team"] + '</b> <br><table id="first-innings" class="table table-bordered">' +
+        '<thead>' +
+        '<tr>' +
+        '<th>Batsman Name</th>' +
+        '<th>Runs Scored</th>' +
+        '<th>Balls Faced</th>' +
+        '<th>Fours</th>' +
+        '<th>Sixes</th>' +
+        '<th>SR</th>' +
+        '</tr>' +
+        '</thead><tbody>';
+    for (let ev of scorecard.second_innings_batsmen) {
+        innerhtml += '<tr>';
+        innerhtml += '<td><span style="font-weight: bold">' + ev["player_name"] + '</span>&nbsp;&nbsp; <span>' + ev["out_param"] + ' ' + ev["fielder_1"] + '' + ev["bowler"] + '</span></td>';
+        innerhtml += '<td>' + ev["runs"] + '</td>' +
+            '<td>' + ev["balls_faced"] + '</td>' +
+            '<td>' + ev["fours"] + '</td>' +
+            '<td>' + ev["sixes"] + '</td>' +
+            '<td>' + ev["strike_rate"] + '</td>' +
+            '</tr>';
+    }
+    innerhtml += '</tbody></table><br><br> <b>' + scorecard["second_innings_bowling_team"] + '</b><table class="table table-bordered"><thead><tr>' +
+        '<th>Bowler Name</th>' +
+        '<th>O</th>' +
+        '<th>R</th>' +
+        '<th>W</th>' +
+        '<th>NB</th>' +
+        '<th>WD</th>' +
+        '<th>ECO</th>' +
+        '</thead></tr><tbody>';
+    for (let ev of scorecard.second_innings_bowlers) {
+        innerhtml += '<tr>';
+        innerhtml += '<td><span style="font-weight: bold">' + ev["player_name"] + '</span></td>';
+        innerhtml += '<td>' + ev["current_ball"] + '</td>' +
+            '<td>' + ev["runs"] + '</td>' +
+            '<td>' + ev["wickets"] + '</td>' +
+            '<td>' + ev["no_ball"] + '</td>' +
+            '<td>' + ev["wide_ball"] + '</td>' +
+            '<td>' + ev["economy_rate"] + '</td>' +
+            '</tr>';
+    }
+
+    innerhtml += '</tbody>' +
+        '</table>';
+    $('#batting-first').html(innerhtml);
 }
 
 $(document).ready(function () {
