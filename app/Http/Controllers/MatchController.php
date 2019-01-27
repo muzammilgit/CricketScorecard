@@ -28,7 +28,7 @@ class MatchController extends Controller
             ($a->elected_to == 1) ? $a->elected = 'Batting' : $a->elected = 'Bowling';
             ($a->won_by == NULL) ? $a->in_progress = true : $a->in_progress = false;
             $a->overs_bowled = $db::select('SELECT COUNT(`id`) as overs FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $a->id)[0]->overs;
-            $a->balls_bowled = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `is_delete` IS NULL AND `isvalid` IN (1,3,4) AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $a->id . ' ORDER BY `id` DESC LIMIT 1)')[0]->balls;
+            $a->balls_bowled = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `is_delete` IS NULL AND `isvalid` IN (1,3,4,10,11,12) AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $a->id . ' ORDER BY `id` DESC LIMIT 1)')[0]->balls;
             if ($a->balls_bowled < 6) {
                 $a->overs_bowled--;
             } else if ($a->balls_bowled == 6) {
@@ -160,10 +160,10 @@ class MatchController extends Controller
             $data["reason"] = $a->reason;
         }
         $data["no_of_overs"] = $a->no_of_overs;
-        $data["wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND `is_delete` IS NULL AND `isvalid` IN (3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
+        $data["wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND `is_delete` IS NULL AND `isvalid` IN (3,7,8,9,10,12,14) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
         $data["overs_bowled"] = $db::select('SELECT COUNT(`id`) as overs FROM `overs` WHERE `is_delete` IS NULL AND `innings` = 1 AND `match_id` = ' . $match_id)[0]->overs;
-        $data["balls_bowled"] = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `is_delete` IS NULL AND `isvalid` IN (1,3,4) AND `innings` = ' . $data["innings"] . ' AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC LIMIT 1)')[0]->balls;
-        if ($data["balls_bowled"] < 6 && $data["balls_bowled"] > 0) {
+        $data["balls_bowled"] = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `is_delete` IS NULL AND `isvalid` IN (1,3,4,10,11,12) AND `innings` = ' . $data["innings"] . ' AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC LIMIT 1)')[0]->balls;
+        if ($data["balls_bowled"] < 6 && $data["overs_bowled"] > 0) {
             $data["overs_bowled"]--;
         } else if ($data["balls_bowled"] == 6) {
             $data["balls_bowled"] = 0;
@@ -227,7 +227,7 @@ class MatchController extends Controller
         $data["currentover"] = $db::select('SELECT `isvalid` as is_legal, `runs_scored` as total_runs FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND  `is_delete` IS NULL AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC LIMIT 1)');
         $data["team_runs_disp"] = $db::select('SELECT SUM(`runs_scored`), IF(SUM(`runs_scored`) IS NULL,0,SUM(`runs_scored`)) as runs FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND  `is_delete` IS NULL AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
         $data["first_team_runs"] = $db::select('SELECT SUM(`runs_scored`), IF(SUM(`runs_scored`) IS NULL,0,SUM(`runs_scored`)) as runs FROM `balls` WHERE `innings` = 1 AND `is_delete` IS NULL AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
-        $data["first_team_wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = 1 AND `is_delete` IS NULL AND `isvalid` IN (3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
+        $data["first_team_wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = 1 AND `is_delete` IS NULL AND `isvalid` IN (3,7,8,9,10,12,14) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
         $data["first_innings_score"] = $data["first_team_runs"] . '/' . $data["first_team_wickets"];
         $data["over_id"] = $db::select('SELECT `id` FROM `overs` WHERE `match_id` =' . $match_id . ' ORDER BY `id` DESC LIMIT 1');
         if (count($data["over_id"]) > 0) {
@@ -235,9 +235,9 @@ class MatchController extends Controller
         } else {
             $data["over_id"] = 0;
         }
-        $data["wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND `is_delete` IS NULL AND `isvalid` IN (3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
+        $data["wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND `is_delete` IS NULL AND `isvalid` IN (3,7,8,9,10,12,14) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
         $data["overs_bowled"] = $db::select('SELECT COUNT(`id`) as overs FROM `overs` WHERE `innings` = ' . $data["innings"] . ' AND `is_delete` IS NULL AND `match_id` = ' . $match_id)[0]->overs;
-        $data["balls_bowled"] = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND  `is_delete` IS NULL AND `isvalid` IN (1,3,4) AND `innings` = ' . $data["innings"] . ' AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `is_delete` IS NULL ORDER BY `id` DESC LIMIT 1)')[0]->balls;
+        $data["balls_bowled"] = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND  `is_delete` IS NULL AND `isvalid` IN (1,3,4,10,11,12) AND `innings` = ' . $data["innings"] . ' AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `is_delete` IS NULL ORDER BY `id` DESC LIMIT 1)')[0]->balls;
         if ($data["balls_bowled"] < 6) {
             if ($data["overs_bowled"] != 0)
                 $data["overs_bowled"]--;
@@ -265,16 +265,16 @@ class MatchController extends Controller
             $id = ($a->toss_won_by == $a->team_a_id) ? $a->team_b_id : $a->team_a_id;
             $bowl = $a->toss_won_by;
         }
-        $data["first_innings_wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND `innings` = 1 AND `is_delete` IS NULL AND `isvalid` IN (3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
+        $data["first_innings_wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND `innings` = 1 AND `is_delete` IS NULL AND `isvalid` IN (3,7,8,9,10,12,14) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
         $data["first_innings_overs_bowled"] = $db::select('SELECT COUNT(`id`) as overs FROM `overs` WHERE `is_delete` IS NULL AND `innings` = 1 AND `match_id` = ' . $match_id)[0]->overs;
-        $data["first_innings_balls_bowled"] = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `is_delete` IS NULL AND `isvalid` IN (1,3,4) AND `innings` = ' . $data["innings"] . ' AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC LIMIT 1)')[0]->balls;
+        $data["first_innings_balls_bowled"] = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `is_delete` IS NULL AND `isvalid` IN (1,3,4,10,11,12) AND `innings` = ' . $data["innings"] . ' AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC LIMIT 1)')[0]->balls;
         if ($data["first_innings_balls_bowled"] > 0 && $data["first_innings_overs_bowled"] != 6) {
             $data["first_innings_overs_bowled"]--;
         } else if ($data["first_innings_overs_bowled"] == 6) {
             $data["first_innings_overs_bowled"] = 0;
         }
         $data["first_innings_all_batsmen"] = $db::select('SELECT a.id as pid, player_name FROM `players` a WHERE a.team_id AND `team_id` = ' . $id);
-        $data["first_innings_batsmen"] = $db::select('SELECT * FROM `balls` WHERE `isvalid` = 3 AND over_id IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ') AND scored_by IN (SELECT `id` FROM `players` WHERE `team_id` = ' . $id . ') ORDER BY `id` ASC');
+        $data["first_innings_batsmen"] = $db::select('SELECT * FROM `balls` WHERE `isvalid` IN (3,7,8,9,10,12,14) AND `is_delete` IS NULL AND over_id IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ') AND scored_by IN (SELECT `id` FROM `players` WHERE `team_id` = ' . $id . ') ORDER BY `id` ASC');
         $data["first_innings_batting_team"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $id)[0]->team_name;
         $data["first_innings_bowling_team"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $bowl)[0]->team_name;
         $data["match_id"] = $match_id;
@@ -288,15 +288,15 @@ class MatchController extends Controller
             }
         }
         $batsman = $db::select('SELECT * FROM `current_batsman_and_bowler` WHERE `m_id` = ' . $match_id . ' AND `is_delete` IS NULL AND `innings` = 1 ORDER BY `id` DESC LIMIT 1')[0];
+        $batsman1 = $batsman;
         $b2_id = $batsman->b2_id;
         $batsman->out_param = 0;
         $batsman = $this->filterPlayerScorecard($data["first_innings_all_batsmen"], $batsman->b1_id, true, $batsman, $match_id, $data["innings"], 0);
         $batsman->bowler = '';
         $batsmen1[] = $batsman;
-        $batsman->out_param = 0;
-        $batsman = $this->filterPlayerScorecard($data["first_innings_all_batsmen"], $b2_id, true, $batsman, $match_id, $data["innings"], 0);
-        $batsman->bowler = '';
-        $batsmen1[] = $batsman;
+        $batsman1 = $this->filterPlayerScorecard($data["first_innings_all_batsmen"], $b2_id, true, $batsman1, $match_id, $data["innings"], 0);
+        $batsman1->bowler = '';
+        $batsmen1[] = $batsman1;
         $data["first_innings_batsmen"] = $batsmen1;
         $data["first_innings_all_bowlers"] = $db::select('SELECT a.id as pid, player_name FROM `players` a WHERE a.team_id AND `team_id` = ' . $bowl);
         $data["first_innings_bowlers"] = $db::select('SELECT DISTINCT b.bowler_id FROM `balls` as a, `overs` as b WHERE a.over_id=b.id AND b.is_delete IS NULL AND b.match_id = ' . $match_id . ' AND b.innings = 1');
@@ -311,16 +311,16 @@ class MatchController extends Controller
         $c = $id;
         $id = $bowl;
         $bowl = $c;
-        $data["second_innings_wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND `is_delete` IS NULL AND `isvalid` IN (3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
+        $data["second_innings_wickets"] = $db::select('SELECT COUNT(`id`) as wickets FROM `balls` WHERE `innings` = ' . $data["innings"] . ' AND `is_delete` IS NULL AND `isvalid` IN (3,7,8,9,10,12,14) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ')')[0]->wickets;
         $data["second_innings_overs_bowled"] = $db::select('SELECT COUNT(`id`) as overs FROM `overs` WHERE `is_delete` IS NULL AND `innings` = 2 AND `match_id` = ' . $match_id)[0]->overs;
-        $data["second_innings_balls_bowled"] = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `is_delete` IS NULL AND `isvalid` IN (1,3,4) AND `innings` = ' . $data["innings"] . ' AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC LIMIT 1)')[0]->balls;
+        $data["second_innings_balls_bowled"] = $db::select('SELECT COUNT(`id`) as balls FROM `balls` WHERE `is_delete` IS NULL AND `isvalid` IN (1,3,4,10,11,12) AND `innings` = ' . $data["innings"] . ' AND `over_id` = (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC LIMIT 1)')[0]->balls;
         if ($data["second_innings_balls_bowled"] > 0 && $data["second_innings_balls_bowled"] != 6) {
             $data["second_innings_overs_bowled"]--;
         } else if ($data["second_innings_balls_bowled"] == 6) {
             $data["second_innings_balls_bowled"] = 0;
         }
         $data["second_innings_all_batsmen"] = $db::select('SELECT a.id as pid, player_name FROM `players` a WHERE a.team_id AND `team_id` = ' . $id);
-        $data["second_innings_batsmen"] = $db::select('SELECT * FROM `balls` WHERE `isvalid` = 3 AND over_id IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ') AND scored_by IN (SELECT `id` FROM `players` WHERE `team_id` = ' . $id . ') ORDER BY `id` ASC');
+        $data["second_innings_batsmen"] = $db::select('SELECT * FROM `balls` WHERE `isvalid` IN (3,7,8,9,10,12,14) AND `is_delete` IS NULL AND over_id IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ') AND scored_by IN (SELECT `id` FROM `players` WHERE `team_id` = ' . $id . ') ORDER BY `id` ASC');
         $data["second_innings_batting_team"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $id)[0]->team_name;
         $data["second_innings_bowling_team"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $bowl)[0]->team_name;
         $batsmen1 = array();
@@ -330,27 +330,32 @@ class MatchController extends Controller
             $batsman->bowler = ' b ' . $bowler;
             $batsmen1[] = $batsman;
         }
-        $batsman = $db::select('SELECT * FROM `current_batsman_and_bowler` WHERE `m_id` = ' . $match_id . ' AND `is_delete` IS NULL AND  `innings` = 2 ORDER BY `id` DESC LIMIT 1')[0];
-        $b2_id = $batsman->b2_id;
-        $batsman = $this->filterPlayerScorecard($data["second_innings_all_batsmen"], $batsman->b1_id, true, $batsman, $match_id, $data["innings"], 0);
-        $batsman->bowler = '';
-        $batsmen1[] = $batsman;
-        $batsman = $this->filterPlayerScorecard($data["second_innings_all_batsmen"], $b2_id, true, $batsman, $match_id, $data["innings"], 0);
-        $batsman->bowler = '';
-        $batsmen1[] = $batsman;
-        $data["second_innings_batsmen"] = $batsmen1;
-        $data["second_innings_all_bowlers"] = $db::select('SELECT a.id as pid, player_name FROM `players` a WHERE a.team_id AND `team_id` = ' . $bowl);
-        $data["second_innings_bowlers"] = $db::select('SELECT DISTINCT b.bowler_id FROM `balls` as a, `overs` as b WHERE a.over_id=b.id AND b.is_delete IS NULL AND b.match_id = ' . $match_id . ' AND b.innings = 2');
-        $bowler1 = array();
-        foreach ($data["second_innings_bowlers"] as $bowler) {
-            $bowler = $this->filterPlayerScorecard($data["second_innings_all_bowlers"], $bowler->bowler_id, false, $bowler, $match_id, $data["innings"], 0);
-            $bowler1[] = $bowler;
+        $batsman = $db::select('SELECT * FROM `current_batsman_and_bowler` WHERE `m_id` = ' . $match_id . ' AND `is_delete` IS NULL AND  `innings` = 2 ORDER BY `id` DESC LIMIT 1');
+        if (count($batsman) > 0) {
+            $batsman = $batsman[0];
+            $batsman1 = $batsman;
+            $b2_id = $batsman->b2_id;
+            $batsman = $this->filterPlayerScorecard($data["second_innings_all_batsmen"], $batsman->b1_id, true, $batsman, $match_id, $data["innings"], null);
+            $batsman->bowler = '';
+            $batsmen1[] = $batsman;
+            $batsman1 = $this->filterPlayerScorecard($data["second_innings_all_batsmen"], $b2_id, true, $batsman1, $match_id, $data["innings"], null);
+            $batsman->bowler = '';
+            $batsmen1[] = $batsman1;
+            $data["second_innings_batsmen"] = $batsmen1;
+            $data["second_innings_all_bowlers"] = $db::select('SELECT a.id as pid, player_name FROM `players` a WHERE a.team_id AND `team_id` = ' . $bowl);
+            $data["second_innings_bowlers"] = $db::select('SELECT DISTINCT b.bowler_id FROM `balls` as a, `overs` as b WHERE a.over_id=b.id AND b.is_delete IS NULL AND b.match_id = ' . $match_id . ' AND b.innings = 2');
+            $bowler1 = array();
+            foreach ($data["second_innings_bowlers"] as $bowler) {
+                $bowler = $this->filterPlayerScorecard($data["second_innings_all_bowlers"], $bowler->bowler_id, false, $bowler, $match_id, $data["innings"], 0);
+                $bowler1[] = $bowler;
+            }
+            $data["second_innings_bowlers"] = $bowler1;
+            $data["second_team_runs"] = $db::select('SELECT SUM(`runs_scored`), IF(SUM(`runs_scored`) IS NULL,0,SUM(`runs_scored`)) as runs FROM `balls` WHERE `innings` = 2 AND `is_delete` IS NULL AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
+            $data["won_by"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $a->won_by)[0]->team_name;
+            $data["toss_won_by"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $a->toss_won_by)[0]->team_name;
+            $data["elected_to"] = ($a->elected_to == 1) ? 'Bat' : 'Bowl';
         }
-        $data["second_innings_bowlers"] = $bowler1;
-        $data["second_team_runs"] = $db::select('SELECT SUM(`runs_scored`), IF(SUM(`runs_scored`) IS NULL,0,SUM(`runs_scored`)) as runs FROM `balls` WHERE `innings` = 2 AND `is_delete` IS NULL AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
-        $data["won_by"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $a->won_by)[0]->team_name;
-        $data["toss_won_by"] = $db::select('SELECT `team_name` FROM `teams` WHERE `id` = ' . $a->toss_won_by)[0]->team_name;
-        $data["elected_to"] = ($a->elected_to == 1) ? 'Bat' : 'Bowl';
+        dd($data);
         return json_encode($data);
     }
 
@@ -362,7 +367,7 @@ class MatchController extends Controller
                     $ev->runs = DB::select('SELECT SUM(`runs_scored`) as runs, IF(SUM(runs_scored) IS NULL,0,SUM(runs_scored)) as total_runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->total_runs;
                     $ev->overs = DB::select('SELECT COUNT(`id`) as overs FROM `overs` WHERE `innings` = ' . $innings . ' AND `match_id` = ' . $match_id . ' AND `is_delete` IS NULL AND `bowler_id` = ' . $ev->pid)[0]->overs;
                     $ev->wickets = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (3) AND `out_param` <> 4 AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
-                    $ev->balls = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (1,3,4) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
+                    $ev->balls = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (1,3,4,10,11,12) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
                     if ($ev->balls >= 6) {
                         $ev->balls = $ev->balls % 6;
                     } else {
@@ -373,7 +378,7 @@ class MatchController extends Controller
                 }
                 $ev->runs = DB::select('SELECT SUM(`runs_scored`) as runs, IF(SUM(runs_scored) IS NULL,0,SUM(runs_scored)) as total_runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (1) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->total_runs;
                 $ev->no_balls = DB::select('SELECT * FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (5,6) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)');
-                $ev->balls_faced = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (1,3,4) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
+                $ev->balls_faced = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (1,3,4,10,11,12) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
                 foreach ($ev->no_balls as $no_ball) {
                     if ($no_ball->runs_scored > 1) {
                         $ev->balls_faced++;
@@ -381,8 +386,8 @@ class MatchController extends Controller
                             $ev->runs = $ev->runs + ($no_ball->runs_scored - 1);
                     }
                 }
-                $ev->fours = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `runs_scored` IN (4,5) AND `isvalid` IN (1,3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
-                $ev->sixes = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `runs_scored` IN (6,7) AND `isvalid` IN (1,3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
+                $ev->fours = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `runs_scored` IN (4,5) AND `isvalid` IN (1,5) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
+                $ev->sixes = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `runs_scored` IN (6,7) AND `isvalid` IN (1,5) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
                 if ($on_strike == $id) {
                     $ev->on_strike = true;
                 }
@@ -398,10 +403,10 @@ class MatchController extends Controller
                 if (!$on_strike) {
                     $ev->runs = DB::select('SELECT SUM(`runs_scored`) as runs, IF(SUM(runs_scored) IS NULL,0,SUM(runs_scored)) as total_runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->total_runs;
                     $ev->overs = DB::select('SELECT COUNT(`id`) as overs FROM `overs` WHERE `innings` = ' . $innings . ' AND `match_id` = ' . $match_id . ' AND `is_delete` IS NULL AND `bowler_id` = ' . $ev->pid)[0]->overs;
-                    $ev->balls = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (1,3,4) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
+                    $ev->balls = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (1,3,4,10,11,12) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
                     $ev->wickets = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (3) AND `out_param` <> 4 AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
-                    $ev->no_ball = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (5,6) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
-                    $ev->wide_ball = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (2) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
+                    $ev->no_ball = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (5,6,7) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
+                    $ev->wide_ball = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND `is_delete` IS NULL AND `isvalid` IN (2,8) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' AND `bowler_id` = ' . $ev->pid . ')')[0]->runs;
                     if ($ev->balls >= 6) {
                         $ev->balls = $ev->balls % 6;
                     } else {
@@ -412,18 +417,18 @@ class MatchController extends Controller
                     return $ev;
                 }
                 $ev->runs = DB::select('SELECT SUM(`runs_scored`) as runs, IF(SUM(runs_scored) IS NULL,0,SUM(runs_scored)) as total_runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (1) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->total_runs;
-                $ev->no_balls = DB::select('SELECT * FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (5,6) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)');
-                $ev->balls_faced = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (1,3,4) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
+                $ev->no_balls = DB::select('SELECT * FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (5,6,7,9) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)');
+                $ev->balls_faced = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `isvalid` IN (1,3,4,10,11,12) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
                 foreach ($ev->no_balls as $no_ball) {
                     if ($no_ball->runs_scored > 1) {
                         $ev->balls_faced++;
-                        if ($no_ball->isvalid != 6)
+                        if ($no_ball->isvalid != 6 && $no_ball->isvalid != 9)
                             $ev->runs = $ev->runs + ($no_ball->runs_scored - 1);
                     }
                 }
-                $ev->fours = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `runs_scored` IN (4,5) AND `isvalid` IN (1,3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
-                $ev->sixes = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `runs_scored` IN (6,7) AND `isvalid` IN (1,3) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
-                $ev->strike_rate = round(($ev->runs / $ev->balls_faced) * 100, 2);
+                $ev->fours = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `runs_scored` IN (4,5) AND `isvalid` IN (1,5) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
+                $ev->sixes = DB::select('SELECT COUNT(`id`) as runs FROM `balls` WHERE `innings` = ' . $innings . ' AND  `is_delete` IS NULL AND `scored_by` = ' . $ev->pid . ' AND `runs_scored` IN (6,7) AND `isvalid` IN (1,5) AND `over_id` IN (SELECT `id` FROM `overs` WHERE `is_delete` IS NULL AND `match_id` = ' . $match_id . ' ORDER BY `id` DESC)')[0]->runs;
+                $ev->strike_rate = ($ev->balls_faced == 0 ? 0 : round(($ev->runs / $ev->balls_faced) * 100, 2));
                 $ev->fielder_1 = '';
                 $ev->fielder_2 = '';
                 switch ($out_params) {
@@ -438,13 +443,13 @@ class MatchController extends Controller
                         $ev->out_param = 'Lbw';
                         break;
                     case 4:
-                        $ev->out_param = 'Run Out';
+                        $ev->out_param = 'run out';
                         $ev->fielder_1 = DB::select('SELECT `player_name` FROM `players` WHERE `id` =' . $batsman->fielder_1)[0]->player_name;
                         $ev->fielder_2 = DB::select('SELECT `player_name` FROM `players` WHERE `id` =' . $batsman->fielder_2)[0]->player_name;
                         break;
                     case 5:
                         $ev->out_param = 'st';
-                        $ev->fielder_1 = DB::select('SELECT `player_name` FROM `` WHERE `id` =' . $batsman->fielder_1)[0]->player_name;
+                        $ev->fielder_1 = DB::select('SELECT `player_name` FROM `players` WHERE `id` =' . $batsman->fielder_1)[0]->player_name;
                         break;
                     case 6:
                         $ev->out_param = 'Hit W';
@@ -493,10 +498,10 @@ class MatchController extends Controller
         $out_params = null;
         $fielder_1 = null;
         $fielder_2 = null;
-        if ($is_valid == 3) {
+        if ($is_valid == 3 || $is_valid == 7 || $is_valid == 8 || $is_valid == 9 || $is_valid == 10) {
             $out_params = $request->input('out_params');
             $fielder_1 = $request->input('fielder_1');
-            $fielder_2 = $request->input('fielder_1');
+            $fielder_2 = $request->input('fielder_2');
             if ($fielder_1 == '') {
                 $fielder_1 = null;
             }
@@ -512,8 +517,7 @@ class MatchController extends Controller
             $b2 = $currentbatsmen[1]["pid"];
             if ($currentbatsmen[0]["on_strike"] == 'true') {
                 $onstrike = $b1;
-            }
-            if ($currentbatsmen[1]["on_strike"] == 'true') {
+            } else {
                 $onstrike = $b2;
             }
             $b3 = $currentbowler["pid"];

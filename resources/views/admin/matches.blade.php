@@ -221,6 +221,7 @@
                                 </div>
                             </div>
                         </div>
+
                         @endif
 
                         @if(isset($startMatch) && $startMatch)
@@ -237,8 +238,10 @@
                                                         id="team_runs_disp">12</span>/<span
                                                         id="wickets">1</span></b> (<span id="overs_bowled"></span>)
                                             <br>
-                                            <span style="float: right"><button class="btn btn-gradient-ibiza"
-                                                                               id="end_match">End Match</button></span>
+                                            <span style="float: right"><button class="btn btn-primary"
+                                                                               id="change_strike">Change Strike</button>&nbsp;&nbsp;<button
+                                                        class="btn btn-gradient-ibiza"
+                                                        id="end_match">End Match</button></span>
                                             <br>
                                         </div>
                                         <div class="table-responsive" id="table-score">
@@ -309,8 +312,11 @@
                                             <div class="col-lg-2">
                                                 <button class="btn btn-gradient-bloody" id="runsWd">Wd</button>
                                             </div>
-                                            <div class="col-lg-2">
+                                            <div class="col-lg-1">
                                                 <button class="btn btn-gradient-bloody" id="runsW">W</button>
+                                            </div>
+                                            <div class="col-lg-1">
+                                                <button class="btn btn-gradient-bloody" id="runsB">B</button>
                                             </div>
                                             <div class="col-lg-1">
                                                 <button class="btn btn-gradient-bloody" id="runsLb">Lb</button>

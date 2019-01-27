@@ -334,7 +334,27 @@ function calculateRuns(runs, extras_flag, extras_runs) {
         insertVal.val(runs)
     } else {
         let condition = insertVal.val();
-        if (condition === "Nb" && runs === "Lb") {
+        if (condition === "Nb + W" && runs === "B") {
+            insertVal.val(condition + ' + ' + runs);
+            $('#is_legal').val(14);
+            $('#total_runs').val(2);
+        } else if (condition === "Nb" && runs === "B") {
+            insertVal.val(condition + ' + ' + runs);
+            $('#is_legal').val(13);
+            $('#total_runs').val(1);
+        } else if (condition === "W" && runs === "B") {
+            insertVal.val(condition + ' + ' + runs);
+            $('#is_legal').val(12);
+            $('#total_runs').val(1);
+        } else if (condition === "W" && runs === "Lb") {
+            insertVal.val(condition + ' + ' + runs);
+            $('#is_legal').val(10);
+            $('#total_runs').val(1);
+        } else if (condition === "Nb + W" && runs === "Lb") {
+            insertVal.val(condition + ' + ' + runs);
+            $('#is_legal').val(9);
+            $('#total_runs').val(2);
+        } else if (condition === "Nb" && runs === "Lb") {
             insertVal.val(condition + ' + ' + runs);
             $('#is_legal').val(6);
             $('#total_runs').val(2);
@@ -383,10 +403,10 @@ function submitBall() {
     }
     $('#recent' + (json_v.currentover.length)).html(run.val());
     let k = json_v.currentover;
-    k = k.filter(v => parseInt(v["is_legal"]) === 1 || parseInt(v["is_legal"]) === 3 || parseInt(v["is_legal"]) === 4).length;
+    k = k.filter(v => parseInt(v["is_legal"]) === 1 || parseInt(v["is_legal"]) === 3 || parseInt(v["is_legal"]) === 4 || parseInt(v["is_legal"]) === 10 || parseInt(v["is_legal"]) === 11 || parseInt(v["is_legal"]) === 12).length;
     updateBowler(k, curr_ball.total_runs);
     updateBatsmen(k, curr_ball.total_runs);
-    if (parseInt(curr_ball.is_legal) === 3) {
+    if (parseInt(curr_ball.is_legal) === 3 || parseInt(curr_ball.is_legal) === 7 || parseInt(curr_ball.is_legal) === 8 || parseInt(curr_ball.is_legal) === 9 || parseInt(curr_ball.is_legal) === 10 || parseInt(curr_ball.is_legal) === 12 || parseInt(curr_ball.is_legal) === 14) {
         getNextBatsman();
     }
     json_v.team_runs_disp = parseInt(json_v.team_runs_disp) + parseInt(curr_ball.total_runs);
@@ -442,23 +462,24 @@ function insertBallServer(is_legal, total_runs, scored_by) {
         fielder_2: fielder_2,
         innings: json_v.innings
     };
-    $.post('/match/' + json_v.match_id + '/insertBall', data).then(data => {
-        let k = json_v.currentover;
-        k = k.filter(v => parseInt(v["is_legal"]) === 1 || parseInt(v["is_legal"]) === 3 || parseInt(v["is_legal"]) === 4).length;
-        if (k === 6) {
-            // Start new over
-            // open a modal
-            if ((parseInt(is_legal.val()) !== 3)) {
-                setTimeout(() => {
-                    window.location.reload(true);
-                });
+    if (is_legal)
+        $.post('/match/' + json_v.match_id + '/insertBall', data).then(data => {
+            let k = json_v.currentover;
+            k = k.filter(v => parseInt(v["is_legal"]) === 1 || parseInt(v["is_legal"]) === 3 || parseInt(v["is_legal"]) === 4).length;
+            if (k === 6) {
+                // Start new over
+                // open a modal
+                if ((parseInt(is_legal.val()) !== 3)) {
+                    setTimeout(() => {
+                        window.location.reload(true);
+                    });
+                }
             }
-        }
-        if (parseInt(json_v.overs_bowled) === parseInt(json_v.no_of_overs) || parseInt(json_v.wickets) === 10) {
-            // start new Innings
-            window.location.reload(true);
-        }
-    })
+            if (parseInt(json_v.overs_bowled) === parseInt(json_v.no_of_overs) || parseInt(json_v.wickets) === 10) {
+                // start new Innings
+                window.location.reload(true);
+            }
+        })
 }
 
 function getNextBatsman() {
@@ -544,6 +565,59 @@ function getRecentBalls() {
                     runs += ' + ' + (parseInt(ev["total_runs"]) - 2);
                 html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
                 break;
+            case 7:
+                end++;
+                runs = 'Nb + W';
+                if (parseInt(ev["total_runs"]) > 1)
+                    runs += ' + ' + (parseInt(ev["total_runs"]) - 1);
+                html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
+                break;
+            case 8:
+                end++;
+                runs = 'Wd + W';
+                if (parseInt(ev["total_runs"]) > 1)
+                    runs += ' + ' + (parseInt(ev["total_runs"]) - 1);
+                html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
+                break;
+            case 9:
+                end++;
+                runs = 'Nb + W + Lb';
+                if (parseInt(ev["total_runs"]) > 2)
+                    runs += ' + ' + (parseInt(ev["total_runs"]) - 2);
+                html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
+                break;
+            case 10:
+                runs = 'W + Lb';
+                if (parseInt(ev["total_runs"]) > 1)
+                    runs += ' + ' + (parseInt(ev["total_runs"]) - 1);
+                html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
+                break;
+            case 11:
+                runs = 'b';
+                if (parseInt(ev["total_runs"]) > 1)
+                    runs += ' + ' + (parseInt(ev["total_runs"]) - 1);
+                html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
+                break;
+            case 12:
+                runs = 'W + b';
+                if (parseInt(ev["total_runs"]) > 1)
+                    runs += ' + ' + (parseInt(ev["total_runs"]) - 1);
+                html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
+                break;
+            case 13:
+                end++;
+                runs = 'Nb + b';
+                if (parseInt(ev["total_runs"]) > 1)
+                    runs += ' + ' + (parseInt(ev["total_runs"]) - 1);
+                html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
+                break;
+            case 14:
+                end++;
+                runs = 'Nb + W + b';
+                if (parseInt(ev["total_runs"]) > 2)
+                    runs += ' + ' + (parseInt(ev["total_runs"]) - 2);
+                html += ' <button class="btn btn-min btn-outline-dark" id="recent' + i + '">' + runs + '</button>';
+                break;
         }
         i++;
     }
@@ -591,7 +665,7 @@ function getEconomyRate(current_over, balls, runs) {
 function updateBatsmen(balls, runs) {
     const is_legal = $('#is_legal');
     let bonstrike = json_v.currentbatsmen.filter(v => v["on_strike"])[0];
-    const pid = bonstrike["pid"];
+    let pid = bonstrike["pid"];
     let bnonstrike = json_v.currentbatsmen.filter(v => !v["on_strike"])[0];
     if (parseInt(is_legal.val()) === 1 || parseInt(is_legal.val()) === 4) {
         // legal delivery
@@ -622,9 +696,10 @@ function updateBatsmen(balls, runs) {
                 break;
         }
     }
-    else if (parseInt(is_legal.val()) === 3) {
+    else if (parseInt(is_legal.val()) === 3 || parseInt(is_legal.val()) === 7 || parseInt(is_legal.val()) === 8 || parseInt(is_legal.val()) === 9 || parseInt(is_legal.val()) === 10 || parseInt(is_legal.val()) === 12 || parseInt(is_legal.val()) === 14) {
         json_v.wickets++;
         runs = parseInt(runs);
+        pid = $('#who_is_out').val();
         switch (runs) {
             case 1:
             case 2:
@@ -678,6 +753,24 @@ function updateBatsmen(balls, runs) {
                 break;
         }
         runs++;
+    } else if (parseInt(is_legal.val()) === 11) {
+        runs = parseInt(runs);
+        switch (runs) {
+            case 1:
+            case 3:
+            case 5:
+                bonstrike["balls_faced"] = parseInt(bonstrike["balls_faced"]) + 1;
+                bnonstrike["on_strike"] = true;
+                bonstrike["on_strike"] = false;
+                break;
+            case 0:
+            case 2:
+            case 4:
+            case 6:
+                if (runs !== 0)
+                    bonstrike["balls_faced"] = parseInt(bonstrike["balls_faced"]) + 1;
+                break;
+        }
     } else {
         switch (parseInt(runs)) {
             case 2:
@@ -709,7 +802,15 @@ function submitOverForm() {
 
 function openOutModal() {
     let html = '<option selected disabled>Out How</option>';
-    for (let ev of out_params) {
+    const is_legal = $('#is_legal').val();
+    let out_param = out_params;
+    if (parseInt(is_legal) === 5) {
+        out_param = out_param.filter(v => parseInt(v["id"]) === 4);
+    }
+    if (parseInt(is_legal) === 2) {
+        out_param = out_param.filter(v => parseInt(v["id"]) === 4 || parseInt(v["id"]) === 5);
+    }
+    for (let ev of out_param) {
         html += '<option value="' + ev["id"] + '">' + ev["name"] + '</option>';
     }
     $('#out_params').html(html);
@@ -753,6 +854,8 @@ function getFielderInvolved() {
 }
 
 function submitBatsmanOut() {
+    const is_legal = $('#is_legal');
+    const runs_per_ball = $('#runs_per_ball');
     let out_params = ($('#out_params').val());
     let who_is_out = ($('#who_is_out').val());
     if (out_params === null) {
@@ -765,7 +868,6 @@ function submitBatsmanOut() {
     }
     out_params = parseInt(out_params);
     who_is_out = parseInt(who_is_out);
-    $('#is_legal').val(3);
     const total_runs = $('#total_runs');
     total_runs.val(0);
     fielder_1 = '';
@@ -780,17 +882,30 @@ function submitBatsmanOut() {
             fielder_2 = $('#fielder_2').val();
             break;
     }
+    runs_per_ball.val('W');
     if (out_params === 4) { // if run out
         removeDisabledButtons();
     }
-    $('#runs_per_ball').val('W');
+    if (parseInt(is_legal.val()) === 5) {
+        runs_per_ball.val('Nb + W');
+        is_legal.val(7);
+        total_runs.val(1);
+    }
+    else if (parseInt(is_legal.val()) === 2) {
+        runs_per_ball.val('Wd + W');
+        is_legal.val(8);
+        total_runs.val(1);
+    }
+    else {
+        is_legal.val(3);
+    }
     $('#batsmanOut').modal('hide');
     return false;
 }
 
 function getBatsmanOnStrike() {
     const next_batsman = $('#next_batsman');
-    json_v.currentbatsmen.push(json_v.allbatsmen.filter(v => parseInt(v["pid"]) === parseInt(next_batsman.val()))[0]);
+    json_v.currentbatsmen[1] = json_v.allbatsmen.filter(v => parseInt(v["pid"]) === parseInt(next_batsman.val()))[0];
     let html = '<option selected disabled>Select Batsman</option>';
     for (let ev of json_v.currentbatsmen) {
         html += '<option value="' + ev["pid"] + '">' + ev["player_name"] + '</option>';
@@ -801,7 +916,6 @@ function getBatsmanOnStrike() {
 function submitNextBatsman() {
     let next_on_strike = $('#next_on_strike').val();
     let next_batsman = $('#next_batsman').val();
-    console.log(next_batsman, next_on_strike, "console");
     if (next_batsman === null) {
         alert('Please Select Next Batsman');
         return false;
@@ -872,12 +986,16 @@ function getBowlerAndBatsmen(id) {
         if (data["end_match"]) {
             $('#end_match_disp').removeClass('hidden');
             $('#score-buttons').addClass('hidden');
+            $('#end_match').addClass('hidden');
+            $('#change_strike').addClass('hidden');
             $('#reason').html(data["reason"]);
         }
     });
 }
 
 function getScorecard() {
+    $('#end_match').addClass('hidden');
+    $('#change_strike').addClass('hidden');
     $.post('/match/' + json_v.match_id + '/getScorecard', {_token: csrf_token}).then((data) => {
         data = JSON.parse(data);
         scorecard = data;
@@ -1062,6 +1180,13 @@ $(document).ready(function () {
         calculateRuns('Lb', true, 0);
     });
 
+    $('#runsB').click(function () {
+        removeDisabledButtons();
+        $('#is_legal').val(11);
+        $('#total_runs').val(1);
+        calculateRuns("B", true, 0);
+    });
+
     for (let i = 0; i < 7; i++) {
         $('#runsplus' + i).click(function () {
             calculateRuns($('#runs_per_ball').val(), true, i);
@@ -1136,15 +1261,29 @@ $(document).ready(function () {
     });
 
     $('#end_match_form').submit(() => {
+        $('#end_match_modal').modal('hide');
+        $('#end_match_disp').removeClass('hidden');
+        $('#score-buttons').addClass('hidden');
+        $('#end_match').addClass('hidden');
+        $('#change_strike').addClass('hidden');
+        $('#reason').html($('#reason_end_match').val());
         $.post('/match/' + json_v.match_id + '/endMatch', {
             _token: csrf_token,
             reason: $('#reason_end_match').val()
         }).then((data) => {
-            $('#end_match_modal').modal('hide');
-            $('#end_match_disp').removeClass('hidden');
-            $('#score-buttons').addClass('hidden');
+
         });
         return false;
+    });
+
+    $('#change_strike').click(() => {
+        let k = json_v.currentbatsmen.filter(v => v["on_strike"])[0];
+        k["on_strike"] = false;
+        let k1 = json_v.currentbatsmen.filter(v => !v["on_strike"])[0];
+        k1["on_strike"] = true;
+        json_v.currentbatsmen[0] = k;
+        json_v.currentbatsmen[1] = k1;
+        $('#table-score').html(getInnerHtml());
     });
 
     const my_multi_select1 = $('#my_multi_select1');

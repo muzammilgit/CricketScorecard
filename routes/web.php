@@ -50,7 +50,7 @@ Route::post('/matches/new', 'MatchController@newMatch')->name('newmatchPost')->m
 Route::post('/matches/getOtherTeams', 'MatchController@getOtherTeams')->name('getOtherTeams')->middleware('auth');
 Route::post('/match/{match_number}/add_over', 'MatchController@addOver')->name('addOver')->middleware('auth');
 Route::post('/match/{match_number}/getPlayers', 'MatchController@getPlayers')->name('getPlayers');
-Route::post('/match/{match_number}/getScorecard', 'MatchController@getScorecard')->name('getScorecard');
+Route::get('/match/{match_number}/getScorecard', 'MatchController@getScorecard')->name('getScorecard');
 Route::post('/match/{match_number}/insertOver', 'MatchController@insertOver')->name('insertOver')->middleware('auth');
 Route::post('/match/{match_number}/insertBall', 'MatchController@insertBall')->name('insertBall')->middleware('auth');
 Route::post('/match/{match_number}/changeInnings', 'MatchController@changeInnings')->name('changeInnings')->middleware('auth');
